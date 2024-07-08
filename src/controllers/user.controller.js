@@ -10,7 +10,7 @@ const registerUser = asyncHandler(async (req,res) => {
     if([username,email,fullName,password].some((field) => field?.trim() == ""))
         throw new APIError(400,"All fields are required.");
 
-    const existedUser = User.findOne({$or: [{username},{email}
+    const existedUser = await User.findOne({$or: [{username},{email}
     ]})
     if(existedUser)
         throw new APIError(408,"User with that username or email already exists");
@@ -44,7 +44,7 @@ const registerUser = asyncHandler(async (req,res) => {
     if(!createdUser)
         throw new APIError(500,"Something went wrong while registering the user")
 
-    return res.send(201).json(new APIResponse(200,createdUser,"User registered Successfully"))
+    return res.status(201).json(new APIResponse(200,createdUser,"User registered Successfully"))
 })
 
 export {registerUser};

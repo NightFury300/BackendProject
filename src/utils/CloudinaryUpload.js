@@ -13,11 +13,11 @@ if(!localFilePath) return null;
 //upload
 const response = await v2.uploader.upload(localFilePath,{resource_type:"auto"});
 console.log(response.url);
-fs.unlink(localFilePath);
+fs.unlinkSync(localFilePath);
 return response;
 }
 catch(error){
-fs.unlink(localFilePath);
+fs.unlinkSync(localFilePath);
 return null;
 }
 }
