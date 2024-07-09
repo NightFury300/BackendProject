@@ -60,7 +60,7 @@ userSchema.methods.isCorrectPassword = async function(password){
 }
 
 
-userSchema.methods.getAccessToken = function(){
+userSchema.methods.generateAccessToken = function(){
     return jwt.sign(
         {
             _id: this._id,
@@ -75,7 +75,7 @@ userSchema.methods.getAccessToken = function(){
     );
 }
 
-userSchema.methods.getRefreshToken = function(){
+userSchema.methods.generateRefreshToken = function(){
     return jwt.sign(
         {
             _id: this._id
