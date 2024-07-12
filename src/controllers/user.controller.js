@@ -163,9 +163,106 @@ const refreshAccessToken = asyncHandler(async (req,res) => {
         throw new APIError(401,error?.message || "Invalid Refresh Token")
     }
 })
+
+const changeCurrentPassword = asyncHandler(async (req,res) => {
+    const {oldPassword,newPassword} = req.body;
+
+    const user = await User.findById(req.user?._id);
+    const isCorrectPassword = await user.isCorrectPassword(oldPassword);
+
+    if(!isCorrectPassword)
+        throw new APIError(400,"Invalid Old Password")
+
+    user.password = newPassword
+    await user.save({validateBeforeSave: false})
+
+    return res.
+            status(200).
+            json(new APIResponse(200,{},"Password updated Successfully"))
+})
+
+const getCurrentUser = asyncHandler(async (req,res) => {
+    return res.
+            status(200).
+            json(new APIResponse(200,req.user,"User fetched successfully"))
+})
+
+const updateUserDetails = asyncHandler(async (req,res) => {
+    const {fullName,email} = req.body;
+
+    if(!fullName || !email)
+        throw new APIError(400,"All fields are required")
+
+    const user = User.findByIdAndUpdate(req.user._id,
+        {
+        $set:{
+        fullName,
+        email
+            }
+        },
+    {new: true}
+    ).select("-password")
+
+    return res.
+            status(200).
+            json(new APIResponse(200,user,"Details updated Successfully"))
+})
+
+const updateUserAvatar = asyncHandler(async (req,res) => {
+    const localAvatarPath = req.file;
+    if(!localAvatarPath)
+        throw new APIError(404,"Invalid Avatar Path")
+
+    const avatar = await uploadOnCloudinary(localAvatarPath)
+
+    if(!avatar.url)
+        throw new APIError(400,"Error while uploading")
+
+    const user = User.findByIdAndUpdate(req.user._id,
+        {
+            $set: {
+            avatar: avatar.url
+            }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res.
+            status(200).
+            json(new APIResponse(200,user,"Avatar changed Successfully"))
+})
+
+const updateUserCover = asyncHandler(async (req,res) => {
+    const localCoverPath = req.file;
+    if(!localCoverPath)
+        throw new APIError(404,"Invalid Cover Path")
+
+    const cover = await uploadOnCloudinary(localCoverPath)
+
+    if(!cover.url)
+        throw new APIError(400,"Error while uploading")
+
+    const user = User.findByIdAndUpdate(req.user._id,
+        {
+            $set: {
+            coverImage: cover.url
+            }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res.
+            status(200).
+            json(new APIResponse(200,user,"Avatar changed Successfully"))
+})
 export {
     registerUser,
     loginUser,
     logoutUser,
-    refreshAccessToken
+    refreshAccessToken,
+    changeCurrentPassword,
+    getCurrentUser,
+    updateUserDetails,
+    updateUserAvatar,
+    updateUserCover
 };
